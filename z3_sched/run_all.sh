@@ -1,0 +1,10 @@
+time target/debug/json_sched $1/0.json
+time target/debug/json_sched $1/1.json
+time target/debug/json_sched $1/2.json
+time target/debug/json_sched $1/3.json
+time target/debug/json_sched $1/4.json
+time target/debug/json_sched $1/5.json
+time target/debug/json_sched $1/6.json
+time target/debug/json_sched $1/7.json
+time target/debug/json_sched $1/8.json
+time target/debug/json_sched $1/9.json
