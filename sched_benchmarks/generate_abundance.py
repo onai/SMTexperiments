@@ -1,49 +1,77 @@
-'''
+# Copyright 2018- Onai (Onu Technology, Inc., San Jose, California)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is furnished
+# to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+#  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+"""
 Generates a set of commitments.
 Writes json commitments to disk
-'''
+"""
 
 import json
 import numpy as np
 import string
 import sys
 
-S_CALL_LEN = 10 # n chars in service call
-N_SCALLS_ALLOF = 100 # max # of s_calls in an allof C_{A0}
-N_SC=10
+S_CALL_LEN = 10  # n chars in service call
+N_SCALLS_ALLOF = 100  # max # of s_calls in an allof C_{A0}
+N_SC = 10
 
-COST_CEIL_MAX = 200 # maximum entry in the cost_ceil field for an allof
+COST_CEIL_MAX = 200  # maximum entry in the cost_ceil field for an allof
 
-MAX_N_ALLOFS = 100 # maximum number of allofs to include in the system
-MAX_N_ALLOFS_PER_COMMIT = 10 # maximum number of allofs to include in the system C_{C}
-MAX_INSTANCES_PER_S_CALL = 10 # maximum instance count per service call 
-MAX_N_COMMITS = 1000 #N_{C}
+MAX_N_ALLOFS = 100  # maximum number of allofs to include in the system
+MAX_N_ALLOFS_PER_COMMIT = 10  # maximum number of allofs to include in the system C_{C}
+MAX_INSTANCES_PER_S_CALL = 10  # maximum instance count per service call
+MAX_N_COMMITS = 1000  # N_{C}
+
 
 def build_commitments(n_commits, s_calls):
-    '''
+    """
     Commitments
-    '''
-    return [build_allofs(s_calls, np.random.randint(1, MAX_N_ALLOFS_PER_COMMIT)) for _ in range(n_commits)]
-    
+    """
+    return [
+        build_allofs(s_calls, np.random.randint(1, MAX_N_ALLOFS_PER_COMMIT))
+        for _ in range(n_commits)
+    ]
+
+
 def build_service_calls_list(n):
-    '''
+    """
     A service call is a just a string representing the regid.
     here we generate `n` unique such strings
-    '''
+    """
     s_call_regids = set()
     while len(s_call_regids) < n:
-        new_str = ''.join(np.random.choice(list(string.ascii_uppercase)) for _ in range(S_CALL_LEN))
+        new_str = "".join(
+            np.random.choice(list(string.ascii_uppercase)) for _ in range(S_CALL_LEN)
+        )
         s_call_regids.add(new_str)
-    
+
     return s_call_regids
 
+
 def build_allofs(service_calls, n):
-    '''
+    """
     And allof contains a set of (service-call + instance id) pairs and
     a corresponding boolean indicating request or offer
-    '''
+    """
     return [build_allof(service_calls) for _ in range(n)]
-    
+
 
 def build_allof(service_calls):
     service_calls = list(service_calls)
@@ -60,7 +88,6 @@ def build_allof(service_calls):
         else:
             is_requests.append(False)
 
-    
     for i, call_id in enumerate(included_calls):
         if is_requests[i]:
             # is a request, so we can ask for several ids
@@ -69,7 +96,6 @@ def build_allof(service_calls):
         else:
             instance = np.random.randint(1, MAX_INSTANCES_PER_S_CALL)
             instances.append([instance])
-    
 
     allof_entries = []
 
@@ -79,23 +105,21 @@ def build_allof(service_calls):
 
         for instance_id in call_instance_ids:
             allof_entries.append(
-                (
-                    str(call_id) + '-' + str(instance_id),
-                    request_or_not
-                )
+                (str(call_id) + "-" + str(instance_id), request_or_not)
             )
 
     cost_ceil = np.random.randint(-COST_CEIL_MAX, COST_CEIL_MAX)
 
-    return {'s_calls': allof_entries, 'cost_ceil': cost_ceil}
+    return {"s_calls": allof_entries, "cost_ceil": cost_ceil}
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     n_allofs = int(sys.argv[1])
 
     for i in range(n_allofs):
-        dest_filename = str(i) + '.json'
-        with open(dest_filename, 'w') as handle:
+        dest_filename = str(i) + ".json"
+        with open(dest_filename, "w") as handle:
             s_calls = build_service_calls_list(n=N_SC)
             commits = build_commitments(np.random.randint(MAX_N_COMMITS), s_calls)
-            #commits = build_commitments(10, s_calls)
+            # commits = build_commitments(10, s_calls)
             json.dump(commits, handle, indent=4)
