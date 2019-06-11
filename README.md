@@ -10,4 +10,4 @@ SMT Workshop 2019
 
 Code offered under the MIT License.
 
-(c) Onai 2019-. All Rights Reserved.
+(c) Onai 2018-2019. All Rights Reserved.
